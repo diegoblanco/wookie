@@ -1,0 +1,403 @@
+FORMAT: 1A
+HOST: http://www.google.com
+
+# Compass Open Platform API
+Opent Platform API services for *BBVA Compass* Banking services.
+
+
+# API Building Blocks
+
+## Security
+
+The following security section is based on the [OAuth 2.0][OAuthRef] standard described in the [Security Model][SecurityReference]. 
+
+### Login (To be reviewed)
+
+Method to authenticate a user on the application and allow Wizzo to invoke the business layer.
+
+    POST /management/login/user
+    Authorization: Bearer 167551e6-f0a5-41f5-bc65-e6edf7fa4ebb
+    {
+        "userCredentials":"telephone:password",
+        "clientCredentials":"clientId:clientSecret"
+    }
+    
+
+The response will be a valid TSEC token (level 1)
+
+### Logout
+
+Method to logout a user on the application.
+
+    POST /management/logout/user
+    Authorization: Bearer 167551e6-f0a5-41f5-bc65-e6edf7fa4ebb
+
+
+##Header params
+
+### Transaction ID
+An `X-Unique-Transaction-ID` header cointaining a consumer-generated UUID is used for transactional tracing throughout the architecture.
+
+### Language
+
+Service consumers can select a language of a service, by using standard HTTP headers.
+
+    GET /bucks/123    
+    Accept-Language: “es, en-GB”
+
+If headers are not specified, the service should return *English by default*
+
+##Query Options 
+
+The following query options are based on the [OData v4.0](http://www.odata.org/documentation/odata-version-4-0/) standard published by OASIS. 
+
+### Select & Exclude
+
+Selects and excludes are used when the consumer needs to retrieve only a set of attributes of a representation or all except the indicated, respectively:
+
+Given the following representation:
+
+`GET /address`
+
+                {
+                    "commerceName":"Apple Retail Spain S.L.",
+                    "address"  :{
+                        "addressType": "calle",
+                        "streetAddress":"Maldonado",
+                        "streetNumber":1,
+                        "houseNumber": 3 ,
+                        "houseLetter": "A",
+                        "postcode": "28006",
+                        "town": "Madrid",
+                        "country":"ESP",
+                        "geolocation":{
+                            "latitude": -39.140625,
+                            "longitude": 9.182
+                        }
+                    }
+                }
+
+`GET /address?$select=commerceName,address.town`
+
+                {
+                    "commerceName":"Apple Retail Spain S.L.",
+                    "address"  :{
+                        "town": "Madrid"
+                    }
+                }
+
+`GET /address?$exclude=commerceName,address.town`
+
+                {
+                    "address"  :{
+                        "addressType": "calle",
+                        "streetAddress":"Maldonado",
+                        "streetNumber":1,
+                        "houseNumber": 3 ,
+                        "houseLetter": "A",
+                        "postcode": "28006",
+                        "country":"ESP",
+                        "geolocation":{
+                            "latitude": -39.140625,
+                            "longitude": 9.182
+                        }
+                    }
+                }
+
+### Filtering
+
+This functionality can be used as query params using the following format: ```/entity?$filter=attribute eq "value"```
+
+The following logical operators are currently supported: and (and), Equals, Less Than and Greater than
+
+            Filter examples|
+            :-----------|
+            date gt 2009-11-01T00:00:00Z | 
+            amount.value gt 92.32 | 
+            comments contains 'amazing' | 
+            date eq 2009-11-01T00:00:00Z | 
+            date gt 2009-11-01T00:00:00Z and date lt 2012-10-01T00:00:00Z| 
+            date gt 2010-11-01T00:00:00Z and date lt 2013-10-01T00:00:00Z and amount.value gt 50.1|
+            movementType in (moneyOrder,moneyReception)|
+
+## Resource Representation. Collections
+
+Collections are represented differently depending on whether they are first level resources or subresources. As a rule of thumb, if a collection is subject to pagination, it will be wrapped around the `items` structure:
+
+`GET /wallet/`
+
+            {
+                "items":
+                [
+                    {
+                        "type":"tva",
+                        "pan":"2411*****21215",
+                        "status":"active",
+                        "image": "tva",
+                        "name":"Alfred",
+                        "lastName":"Joseph Hitchcock",
+                        "_links": {
+                            "self": { "method":"GET", "href": "/api/wallet/o3i4ovsivh4o8h02", "api":"wizzo-read"}
+                        }
+                    },
+                    {
+                        "type":"sticker",
+                        "pan":"2411322121215",
+                        "status":"stolen",
+                        "image": "sticker", 
+                        "name":"Alfred",
+                        "lastName":"Joseph Hitchcock",
+                        "_links": {
+                            "self": { "method":"GET", "href": "/api/wallet/o3i4ovsivh4o8h02", "api":"wizzo-read"} ]
+                        }      
+                    }
+                ],
+                "_links": {
+                    "self": { "method":"GET", "href": "/api/wallet", "api":"wizzo-read"}
+                }
+            }
+
+## Hypermedia
+
+Every representation includes the ```_links``` structure, providing a) the URI to that same resource ```self``` and b) the URIs of the first level entities accessible from that resource.  
+
+                "_links": {
+                    "self": { "method": "GET", "href": "/api/me", "api": "wizzo-read"},
+                    "editSelf": { "method": "PUT", "href": "/api/me", "api": "wizzo-write"},
+                    "bucks": { "method": "GET", "href": "/api/bucks", "api": "wizzo-read"},
+                    "moneyOrderSpecs": { "method": "GET", "href": "/api/moneyOrderSpecs", "api": "wizzo-read"},
+                    "createMoneyOrderSpec": { "method": "POST", "href": "/api/moneyOrderSpecs", "api": "wizzo-write"},
+                    "moneyRequestSpecs": { "method": "GET", "href": "/api/moneyRequestSpecs", "api": "wizzo-read"},
+                    "createMoneyRequestSpec": { "method": "POST", "href": "/api/moneyRequestSpecs", "api": "wizzo-write"},
+                    "pots": { "method": "GET", "href": "/api/pots", "api": "wizzo-read"},
+                    "createPot": {"method": "POST", "href": "/api/pots", "api": "wizzo-write"},
+                    "coinJars": { "method": "GET", "href": "/api/coinJars", "api": "wizzo-read"},
+                    "createCoinJar": { "method": "POST", "href": "/api/coinJars", "api": "wizzo-write"},
+                    "movements":{ "method": "GET", "href": "/api/movements", "api": "wizzo-read"},
+                    "cards": { "method": "GET", "href": "/api/wallet", "api": "wizzo-read"},
+                    "createCard": { "method": "POST", "href": "/api/wallet", "api": "wizzo-write"},
+                    "contacts": { "method": "GET", "href": "/api/contacts", "api": "wizzo-read"},
+                    "createContacts": { "method": "POST", "href": "/api/contacts", "api": "wizzo-write"},
+                    "settings": { "method": "GET", "href": "/api/settings", "api": "wizzo-read"},
+                    "editSettings": { "method": "PUT", "href": "/api/settings", "api": "wizzo-write"}
+                
+                }
+
+This API bases its hypermedia format on [HAL](http://stateless.co/hal_specification.html).  
+
+## Pagination
+
+The following pagination structure is returned by services which return collections of resources only when there are more elements that the service returns by default.
+
+Links to the first, next and previous pages are provided. Page size and number is also returned. Totals are not returned due to its inefficient performance.
+
+                "paging": {
+                    "first": { "method":"GET", "href": "/api/coinJars/", "api":"wizzo-read"},
+                    "next": {"method":"GET", "href": "/api/coinJars?page_size=20&page=1", "api":"wizzo-read"},
+                    "prev" : {"method":"GET", "href": "/api/coinJars?page_size=20&page=0", "api":"wizzo-read"},
+                    "page_size": 0,
+                    "page": 1
+                }
+
+## eTags
+
+
+eTag header parameters are returned by ```GET``` services to allow for enhanced caching and network traffic reduction. 
+
+If a client wants to retrieve that same resource, it will use the ```If-None-Match``` header including the original eTag. If the resource has not changed, the service will return a ```304 - Not modified```with no body.
+
+## Recurrence patterns
+
+The recurrence patterns could be:
+
+* *Monthly*
+
+Day value between 1 and 31.
+
+            "periodicity":{
+                "recurrencePattern":{
+                    "period":"monthly",
+                    "day":20
+                },
+                "start": "2014-04-01T23:01:03.083Z",
+                "next": "2014-04-21T23:01:03.083Z",
+                "end": "2014-04-20T23:01:03.083Z"
+            }
+
+
+* *Weekly*
+
+Day value between 0 and 6 being 0 Sunday.
+
+            "periodicity":{
+                "recurrencePattern":{
+                    "period":"weekly",
+                    "day":5
+                },
+                "start": "2014-04-01T23:01:03.083Z",
+                "next": "2014-04-06T23:01:03.083Z",
+                "end": "2014-04-20T23:01:03.083Z"
+            }
+
+* *Custom days*
+
+
+            "periodicity":{
+                "recurrencePattern":{
+                    "period":"customDays",
+                    "day":167
+                },
+                "start": "2014-04-01T23:01:03.083Z",
+                "next": "2014-09-15T23:01:03.083Z",
+                "end": "2015-04-20T23:01:03.083Z"
+            }
+            
+
+
+
+#Group Status Management
+
+Health is the root elemente that allows Third Party applications validate the Open Platform Status.
+This resource will not include any third party app reference on its path as it is implicit via `TSEC`.
+
+# health [/health]
+ 
+  + Model (application/json)
+    
+    + Body
+
+            {
+                "status":"ok"
+            }
+
+
+## GET 
+Checks that Open Platform is up and running normally.
+Only accessible with a valid application token Id.
+
++ Request  
+ + Header
+
+            Authorization: Bearer 213q3513d13w65r1235eg16w5e4g6w5e13sg5e4g
+
+
++ Response 200 (application/json)  
+    [health][]
+
++ Response 400 (application/json)
+
+        {
+            "code" : "SomeErrorHappened",
+            "description": "The current application can't answer"
+        }
+    
++ Response 403 (application/json)
+
+        {
+            "code" : "SecurityApplicationNotAllowed",
+            "description": "The current application can't access this resource"
+        }
+
+
+#Group The root resource: me
+Me is the root element of the API. 
+This kickass resource can be accessed directly to retrieve the **person** resource, 
+/me can play **different roles** --> TBD (3rd party, app user...), depending on the context and authentication and authorisation.  
+Any resource under me/ will not include it on its path as it is implicit via `TSEC`.
+
+## me  [/me]
+
+  + Model (application/json)
+    
+    + Body
+
+
+            {
+                "name": "Alfred",
+                "lastName": "Joseph Hitchcock",
+                "idCard": "50435754G",
+                "avatar": "broccoli",
+                "createdOn": "2014-01-01T23:01:03.083Z",
+                "lastContactListSynch": "2014-01-01T23:15:03.083Z",
+                "identityLevel": {
+                    "level": 10,
+                    "description": "standard"
+                },
+                "address": {
+                    "addressType": "calle",
+                    "streetAddress": "Maldonado",
+                    "streetNumber": 1,
+                    "houseNumber": 3,
+                    "houseLetter": "A",
+                    "postcode": "28006",
+                    "town": "Madrid",
+                    "country": "ESP",
+                    "geolocation": {
+                        "latitude": -39.140625,
+                        "longitude": 9.182
+                    }
+                },
+                "mobilePhone" : "600151248",
+                "email" : "alfred.hitchcock@indiscreet.com",
+                "termsAndConditions": {
+                    "items": [
+                        {
+                            "name": "legalConditions",
+                            "version": 3,
+                            "_links": {
+                                "self": { "method": "GET", "href": "/terms/938jdo8ah3lfi7go2", "api": "wizzo-read" }
+                            }
+                        },
+                        {
+                            "name": "fraud",
+                            "version": 2,
+                            "_links": {
+                                "self": { "method": "GET", "href": "/terms/PQOIUE32492374", "api": "wizzo-read" }
+                            }
+                        },
+                        {
+                            "name": "NFC",
+                            "version": 3,
+                            "_links": {
+                                "self": { "method": "GET", "href": "/terms/pou1234789fase", "api": "wizzo-read" }
+                            }
+                        }
+                    ]
+                },
+                "_links": {
+                    "self": { "method": "GET", "href": "/me", "api": "CoppAPI"},
+                    "editSelf": { "method": "PUT", "href": "/me", "api": "CoppAPI"},
+                    "transfer": { "method": "POST", "href": "/transfer", "api": "CoppAPI"},
+                    "movements":{ "method": "GET", "href": "/movements", "api": "CoppAPI"},
+                    "accounts": { "method": "GET", "href": "/accounts", "api": "CoppAPI"},
+                    "settings": { "method": "GET", "href": "/me/settings", "api": "CoppAPI"},
+                    "editSettings": { "method": "PUT", "href": "/me/settings", "api": "CoppAPI"}
+                }
+            }
+            
+            
+##  GET
+
+Retrieve accessing user info.  
+Only accessible with a valid token Id.
+
++ Request
+
+    + Header
+
+            Authorization: Bearer 213q3513d13w65r1235eg16w5e4g6w5e13sg5e4g
+
++ Response 200 (application/json)
+    [me][]
+    
++ Response 401 (application/json)
+
+        {
+            "code" : "SecurityAccessDenied",
+            "description": "Full authentication is required to access this resource"
+        }
+
+
+
+[OAuthRef]: (http://tools.ietf.org/html/draft-hardt-oauth-01)
+[SecurityReference]: (http://www.google.com)
