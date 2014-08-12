@@ -1,7 +1,7 @@
 FORMAT: 1A
 HOST: http://www.google.com
 
-# Compass Open Platform API - Write
+# Compass Open Platform API - Read
 Opent Platform API services for *BBVA Compass* Banking services.
 
 
@@ -252,6 +252,448 @@ Day value between 0 and 6 being 0 Sunday.
                 "end": "2015-04-20T23:01:03.083Z"
             }
             
+
+
+
+#Group Status Management
+Health is the root elemente that allows Third Party applications validate the Open Platform Status.
+This resource will not include any third party app reference on its path as it is implicit via `TSEC`.
+
+# health [/health]
+ 
+  + Model (application/json)
+    
+    + Body
+
+            {
+                "status":"ok"
+            }
+
+## GET /health
+Checks that Open Platform is up and running normally.
+Only accessible with a valid application token Id.
+
++ Request  
+ 
+    + Header
+
+            Authorization: Bearer 213q3513d13w65r1235eg16w5e4g6w5e13sg5e4g
+
+
++ Response 200 (application/json)  
+    [health][]
+
++ Response 400 (application/json)
+
+        {
+            "code" : "SomeErrorHappened",
+            "description": "The current application can't answer"
+        }
+    
++ Response 403 (application/json)
+
+        {
+            "code" : "SecurityApplicationNotAllowed",
+            "description": "The current application can't access this resource"
+        }
+
+
+#Group The root resource: me
+Me is the root element of the API. 
+This kickass resource can be accessed directly to retrieve the **person** resource, 
+/me can play **different roles** --> TBD (3rd party, app user...), depending on the context and authentication and authorisation.  
+Any resource under me/ will not include it on its path as it is implicit via `TSEC`.
+
+## me  [/me]
+
+  + Model (application/json)
+    
+    + Body
+
+
+            {
+                "name": "Alfred",
+                "lastName": "Joseph Hitchcock",
+                "idCard": "50435754G",
+                "avatar": "broccoli",
+                "createdOn": "2014-01-01T23:01:03.083Z",
+                "lastContactListSynch": "2014-01-01T23:15:03.083Z",
+                "identityLevel": {
+                    "level": 10,
+                    "description": "standard"
+                },
+                "address": {
+                    "addressType": "calle",
+                    "streetAddress": "Maldonado",
+                    "streetNumber": 1,
+                    "houseNumber": 3,
+                    "houseLetter": "A",
+                    "postcode": "28006",
+                    "town": "Madrid",
+                    "country": "ESP",
+                    "geolocation": {
+                        "latitude": -39.140625,
+                        "longitude": 9.182
+                    }
+                },
+                "mobilePhone" : "600151248",
+                "email" : "alfred.hitchcock@indiscreet.com",
+                "termsAndConditions": {
+                    "items": [
+                        {
+                            "name": "legalConditions",
+                            "version": 3,
+                            "_links": {
+                                "self": { "method": "GET", "href": "/terms/938jdo8ah3lfi7go2", "api": "CompassOpenPlatformAPI-Read" }
+                            }
+                        },
+                        {
+                            "name": "fraud",
+                            "version": 2,
+                            "_links": {
+                                "self": { "method": "GET", "href": "/terms/PQOIUE32492374", "api": "CompassOpenPlatformAPI-Read" }
+                            }
+                        },
+                        {
+                            "name": "NFC",
+                            "version": 3,
+                            "_links": {
+                                "self": { "method": "GET", "href": "/terms/pou1234789fase", "api": "CompassOpenPlatformAPI-Read" }
+                            }
+                        }
+                    ]
+                },
+                "_links": {
+                    "self": { "method": "GET", "href": "/me", "api": "CompassOpenPlatformAPI-Read"},
+                    "editSelf": { "method": "PUT", "href": "/me", "api": "CompassOpenPlatformAPI-Read"},
+                    "transfer": { "method": "POST", "href": "/transfer", "api": "CompassOpenPlatformAPI-Read"},
+                    "movements":{ "method": "GET", "href": "/movements", "api": "CompassOpenPlatformAPI-Read"},
+                    "accounts": { "method": "GET", "href": "/accounts", "api": "CompassOpenPlatformAPI-Read"},
+                    "settings": { "method": "GET", "href": "/me/settings", "api": "CompassOpenPlatformAPI-Read"},
+                    "editSettings": { "method": "PUT", "href": "/me/settings", "api": "CompassOpenPlatformAPI-Read"}
+                }
+            }
+
+##  GET /me
+
+Retrieve accessing user info.  
+Only accessible with a valid token Id.
+
++ Request
+
+    + Header
+
+            Authorization: Bearer 213q3513d13w65r1235eg16w5e4g6w5e13sg5e4g
+
++ Response 200 (application/json)
+    [me][]
+    
++ Response 401 (application/json)
+
+        {
+            "code" : "SecurityAccessDenied",
+            "description": "Full authentication is required to access this resource"
+        }
+
+
+#Group Managing Accounts: account
+User performing the query will not be included in the path it is implicit via `TSEC`.
+
+## accounts  [/account]
+
+  + Model (application/json)
+    
+    + Body
+
+
+             {
+                "items":[
+                    {
+                        "type":"credit",
+                        "accountNumber":"2411*****21215",
+                        "status":"active",
+                        "alias":"Work account",
+                        "balance":"2,345.50",
+                        "_links": {
+                            "self": { "method":"GET", "href": "/api/accounts/cvi4ovsivh4o8h02", "api":"CompassOpenPlatformAPI_Read"}
+                        }
+                    },
+                    {
+                        "type":"debit",
+                        "accountNumber":"2411*****98175",
+                        "status":"active",
+                        "alias":"Shared_Account",
+                        "balance":"1,234.45",
+                        "_links": {
+                            "self": { "method":"GET", "href": "/api/accounts/aai45vsivh4o8h02", "api":"CompassOpenPlatformAPI_Read"}
+                        }      
+                    },
+                    {
+                        "type":"debit",
+                        "accountNumber":"2411*****98176",
+                        "status":"active",
+                        "alias":"Shared_Account",
+                        "balance":"1,994.45",
+                        "_links": {
+                            "self": { "method":"GET", "href": "/api/accounts/o3234vsivh4o8h02", "api":"CompassOpenPlatformAPI_Read"}
+                        }      
+                    }
+                ],
+                "_links": {
+                    "self": { "method":"GET", "href": "/accounts", "api":"CompassOpenPlatformAPI-Read"}
+                }
+            }
+
+##  GET /accounts
+Retrieves a BBVA Existing user specified accounts details.
+Only accessible with a valid token. User information is retrieved from `TSEC`.
+
++ Request
+
+    + Header
+
+            Authorization: Bearer 213q3513d13w65r1235eg16w5e4g6w5e13sg5e4g
+
++ Response 200 (application/json)
+    [accounts][]
+    
++ Response 401 (application/json)
+
+        {
+            "code" : "SecurityAccessDenied",
+            "description": "Full authentication is required to access this resource"
+        }
+
+## GET /accounts/{accountId}
+Retrieves a BBVA Existing user specified account details.
+Only accessible with a valid token. User information is retrieved from `TSEC`.
+
++ Parameters
+    + accountId (string) ... unique account identifier. Will be coded as returned in `/accounts` service
+
++ Request
+
+    + Header
+    
+                Authorization: Bearer 213q3513d13w65r1235eg16w5e4g6w5e13sg5e4g        
+
++ Response 200 (application/json)
+
+
+        {
+            "type":"debit",
+            "accountNumber":"2411*****98176",
+            "status":"active",
+            "alias":"Shared_Account",
+            "balance":"1,994.45",
+            "_links": {
+                "self": { "method":"GET", "href": "/api/accounts/o3234vsivh4o8h02", "api":"CompassOpenPlatformAPI_Read"}
+                }      
+        }
+
++ Response 403 (application/json)
+
+
+        {
+            "code" : "SecurityUserNotAllowed",
+            "description": "The current user can't access this resource"
+        }
+
+    
++ Response 401 (application/json)
+
+
+        {
+            "code" : "SecurityAccessDenied",
+            "description": "Full authentication is required to access this resource"
+        }
+
+#Group Movements performed by users
+
+Please refer to the following [document] (https://www.google.com) if you need to see supported movement types
+At this level of the API, movements will always include the from and to subresources:
+
+        ...
+        "from":{
+            "name" : "Tippy",
+            ...
+        },
+        "to":{
+            
+        },
+        ...
+
+When accessed via a resource, i.e., a accounts/{accountId}/movements, the reference to the account will be omitted. 
+In this example, if the movement is a account deposit, the "to" entity is not returned.  
+
+        ...
+        {
+            ...
+                            
+            "movementType" : "deposit",
+            "from":{
+                "name" : "Stanley",  
+                ...  
+                }  
+            ...  
+            },  
+        ...
+
+
+## movements [/movements]
+
+ + Model
+ 
+        {
+            "items": [
+                {
+                    "id" : "1234123412341234123",
+                    "createdOn": "2014-05-14T12:01:03.083Z",  
+                    "movementType" : "deposit",
+                    "reason": "Paying Mike present",
+                    "amount" : {
+                        "value":"15.00",
+                        "currency":"USD"
+                    },
+                    "from":{
+                        "name":"Stephen J. Fry",
+                        "id" : "25",
+                        "_links": {
+                            "self": { "method":"GET", "href": "/users/92309u20d2h308dh0q8h", "api":"CompassOpenPlatformAPI-Read"}
+                        }
+                    },                                     
+                    "to": {
+                        "name":"FBO",
+                        "id":"1234"
+                        "_links": {
+                            "self": { "method":"GET", "href": "/users/92309u20d2h308dh0q8h", "api":"CompassOpenPlatformAPI-Read"}
+                        } 
+                    }, 
+                    "_links": {
+                        "self": { "method":"GET", "href": "/movements/01ued95j08hiqu3ygiygad", "api":"CompassOpenPlatformAPI-Read"}
+                    }
+                },
+                {
+                    "id" : "123412341234125345233",
+                    "createdOn": "2014-05-14T12:01:03.083Z",   
+                    "movementType" : "withdrawal",
+                    "reason": "For Ipad",
+                    "amount" : {
+                        "value":"315.00",
+                        "currency":"USD"
+                    },
+                    "from":{
+                        "name":"FBO",
+                        "id":"1234"
+                        "_links": {
+                            "self": { "method":"GET", "href": "/users/92309u20d2h308dh0q8h", "api":"CompassOpenPlatformAPI-Read"}
+                        }
+                    },              
+                    "to": {
+                        "name":"Stephen J. Fry",
+                        "id" : "25",
+                        "_links": {
+                            "self": { "method":"GET", "href": "/users/92309u20d2h308dh0q8h", "api":"CompassOpenPlatformAPI-Read"}
+                        }
+                    },  
+                    
+                    "_links": {
+                        "self": { "method":"GET", "href": "/api/movements/01ued95j08hiqu3ygiygad", "api":"CompassOpenPlatformAPI-Read"}
+                    }
+                }
+            ]
+            "_links": {
+                "self": { "method": "GET", "href": "/movements", "api": "CompassOpenPlatformAPI-Read"}
+            }
+        }
+
+
+## GET /movements
+
+Lists all movements for a specific user. Expands the details by default if applicable.
+The following filters are provided in order to retrieve different kinds of movements:  movementType, amount.value, createdOn, description
+
++ Request
+
+    + Header
+    
+            Authorization: Bearer 213q3513d13w65r1235eg16w5e4g6w5e13sg5e4g    
+
++ Response 200 (application/json)
+
+    [movements][]
+
++ Response 204    
+
++ Response 401 (application/json)
+
+        {
+            "code" : "SecurityAccessDenied",
+            "description": "Full authentication is required to access this resource"
+        }
+
+
+
+
+
+
+## GET /movements/{movementId}
+
+Retrieves a movement specified by its ID.
+
+
++ Parameters
+    + movementId (string) ... unique movement identifier
+    
++ Request
+
+    + Header
+    
+            Authorization: Bearer 213q3513d13w65r1235eg16w5e4g6w5e13sg5e4g        
+
+
++ Response 200 (application/json)
+
+        {
+            "id" : "123412341234125345233",
+            "createdOn": "2014-05-14T12:01:03.083Z",   
+            "movementType" : "withdrawal",
+                "reason": "For Ipad",
+                "amount" : {
+                    "value":"315.00",
+                    "currency":"USD"
+                },
+                "from":{
+                    "name":"FBO",
+                    "id":"1234"
+                    "_links": {
+                        "self": { "method":"GET", "href": "/users/92309u20d2h308dh0q8h", "api":"CompassOpenPlatformAPI-Read"}
+                    }
+                },              
+                "to": {
+                    "name":"Stephen J. Fry",
+                    "id" : "25",
+                    "_links": {
+                        "self": { "method":"GET", "href": "/users/92309u20d2h308dh0q8h", "api":"CompassOpenPlatformAPI-Read"}
+                    }
+                },  
+                
+                "_links": {
+                    "self": { "method":"GET", "href": "/api/movements/01ued95j08hiqu3ygiygad", "api":"CompassOpenPlatformAPI-Read"}
+                }
+        }
+
+
++ Response 204    
+
+
++ Response 401 (application/json)
+
+
+        {
+            "code" : "SecurityAccessDenied",
+            "description": "Full authentication is required to access this resource"
+        }
 
 
 #Group MoneyOrder
